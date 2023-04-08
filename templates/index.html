@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capital City Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: auto;
+        }
+        
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Capital City Quiz</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %} {% for category, message in messages %}
+    <div class="{{ category }}">{{ message }}</div>
+    {% endfor %} {% endif %} {% endwith %}
+    <form method="POST">
+        <input type="hidden" name="country" value="{{ country }}">
+        <input type="hidden" name="correct_answer" value="{{ correct_answer }}">
+        <p>What is the capital of {{ country }}?</p>
+        <div class="options">
+            {% for option in options %}
+            <label>
+                    <input type="radio" name="answer" value="{{ option }}" required>
+                    {{ option }}
+                </label> {% endfor %}
+        </div>
+        <button type="submit">Check my answer</button>
