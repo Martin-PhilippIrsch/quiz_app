@@ -3,6 +3,7 @@ import random
 import json
 #import secrets
 
+#when deployed, provide full path
 with open("countries_and_capitals.json", "r") as f:
     data = json.load(f)
 
