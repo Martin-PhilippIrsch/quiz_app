@@ -1,38 +1,34 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
-import random
+from flask import Flask, render_template, request, jsonify
 import json
-#import secrets
+import random
+import os
 
-#when deployed, provide full path
-with open("countries_and_capitals.json", "r") as f:
-    data = json.load(f)
+app = Flask(__name__)
+
+json_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'countries_and_capitals.json')
+with open(json_file_path, "r") as file:
+    data = json.load(file)
 
 countries_and_capitals = {item["country"]: item["city"] for item in data}
 
-app = Flask(__name__)
-app.secret_key = "639d7e02a4ec6653752f3f739604ad9c"
-
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    if request.method == 'POST':
-        answer = request.form['answer']
-        correct_answer = request.form['correct_answer']
-        country = request.form['country']
-        if answer == correct_answer:
-            flash("Correct!", "success")
-        else:
-            flash(f"Incorrect! The capital of {country} is {correct_answer}.", "danger")
-        return redirect(url_for('index'))
-
-    country, correct_answer, options = generate_question()
-    return render_template('index.html', country=country, correct_answer=correct_answer, options=options)
-
 def generate_question():
-    country = random.choice(list(countries_and_capitals.keys()))
-    correct_answer = countries_and_capitals[country]
-    options = [correct_answer] + random.sample(list(countries_and_capitals.values()), 2)
+    country, capital = random.choice(list(countries_and_capitals.items()))
+    options = [capital]
+    while len(options) < 3:
+        _, wrong_capital = random.choice(list(countries_and_capitals.items()))
+        if wrong_capital not in options:
+            options.append(wrong_capital)
     random.shuffle(options)
-    return country, correct_answer, options
+    return country, capital, options
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/next-question', methods=['POST'])
+def next_question():
+    country, correct_answer, options = generate_question()
+    return jsonify({'country': country, 'correct_answer': correct_answer, 'options': options})
 
 if __name__ == '__main__':
     app.run(debug=True)
